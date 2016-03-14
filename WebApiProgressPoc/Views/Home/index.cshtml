@@ -1,0 +1,79 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Web Api Progress Bar</title>
+    <script src="~/Scripts/jquery-1.9.1.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/signalr/hubs"></script>
+</head>
+<body>
+<script>
+    var connectionId;
+    var progressHubProxy;
+
+    $(function () {
+        
+        $.connection.hub.logging = true;
+        progressHubProxy = $.connection.progressHub;
+        progressHubProxy.client.updateProgressBar = function (taskId, percentage) {
+            if (taskId == connectionId) {
+                $("#workDone").text(percentage);
+                $('.progress-bar')
+                      .css('width', percentage + '%')
+                      .attr('aria-valuenow', percentage);
+            }
+        };
+        $.connection.hub.start().done(function () {
+            
+           
+            connectionId = $.connection.hub.id;
+            $("#tasker").removeAttr("disabled");
+        });
+        
+
+        
+    });
+
+    function startTask(){
+        $.get("/api/task/longtask/" + connectionId);
+    }
+    
+
+   
+    
+</script>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar"
+                     aria-valuenow="0"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                    <span class="sr-only" id="workDone"></span>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-primary" id="tasker" disabled="disabled" onclick="startTask()">
+                <span class="glyphicon glyphicon-play"></span>
+                Start remote task
+            </button>
+        </div>
+        <div class="col-md-4">
+
+        </div>
+    </div>
+</body>
+
+
+</html>
